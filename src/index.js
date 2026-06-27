@@ -1,9 +1,9 @@
 import qrcode from "qrcode-terminal";
 import whatsapp from "whatsapp-web.js";
 
+import { getAiReply, getProviderLabel } from "./ai.js";
 import { getPuppeteerOptions } from "./chrome.js";
-import { config } from "./config.js";
-import { getAiReply } from "./groq.js";
+import { setupAiProvider } from "./prompt.js";
 
 const { Client, LocalAuth } = whatsapp;
 
@@ -37,13 +37,15 @@ async function handleIncomingMessage(message) {
   } catch (error) {
     console.error("Failed to generate reply:", error.message);
     await message.reply(
-      "Sorry, I could not generate a reply right now. Check the Groq API key.",
+      "Sorry, I could not generate a reply right now. Check your AI provider setup.",
     );
   }
 }
 
 async function main() {
-  console.log(`Using Groq model: ${config.groqModel}`);
+  await setupAiProvider();
+
+  console.log(`AI provider: ${getProviderLabel()}`);
   console.log("Replying to all inbound messages (DMs + groups).");
 
   const client = new Client({
